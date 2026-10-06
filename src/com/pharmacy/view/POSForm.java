@@ -14,10 +14,21 @@ public class POSForm extends javax.swing.JFrame {
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(POSForm.class.getName());
     private DefaultTableModel cartModel;
     private double grandTotal = 0.0;
+    
+    // Default or passed session variables
+    private int currentUserId = 1; 
 
     public POSForm() {
         initComponents();
         setLocationRelativeTo(null); // Center on screen
+        initializeCartTable();
+    }
+    
+    // Overloaded constructor if passing the logged-in user ID from the Login form
+    public POSForm(int userId) {
+        this.currentUserId = userId;
+        initComponents();
+        setLocationRelativeTo(null);
         initializeCartTable();
     }
 
@@ -85,14 +96,27 @@ public class POSForm extends javax.swing.JFrame {
         }
     }
 
-    // 2. Checkout & Process Transaction (Updates stock and saves sale)
+    // 2. Checkout & Process Transaction (Includes customer_id and user_id)
     private void processCheckout() {
         if (cartModel.getRowCount() == 0) {
             JOptionPane.showMessageDialog(this, "Cart is empty!", "Warning", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        String insertSaleQuery = "INSERT INTO sales (total_amount, sale_date) VALUES (?, NOW())";
+        // Get customer ID from text field (defaults to 1 if empty or invalid)
+        int customerId = 1;
+        String custIdStr = txtCustomerId.getText().trim();
+        if (!custIdStr.isEmpty()) {
+            try {
+                customerId = Integer.parseInt(custIdStr);
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(this, "Invalid Customer ID format. Defaulting to Customer ID 1.", "Warning", JOptionPane.WARNING_MESSAGE);
+            }
+        }
+
+        // Updated query including customer_id and user_id
+        String insertInvoiceQuery = "INSERT INTO invoices (customer_id, user_id, total_amount, payment_method, transaction_date) VALUES (?, ?, ?, 'Cash', NOW())";
+        String insertItemQuery = "INSERT INTO invoice_items (invoice_id, product_id, quantity_sold, unit_price_at_sale, subtotal) VALUES (?, ?, ?, ?, ?)";
         String updateStockQuery = "UPDATE products SET stock_quantity = stock_quantity - ? WHERE product_id = ?";
 
         Connection conn = null;
@@ -100,36 +124,54 @@ public class POSForm extends javax.swing.JFrame {
             conn = DBConnection.getConnection();
             conn.setAutoCommit(false); // Start Transaction
 
-            // Insert into sales table
-            PreparedStatement pstmtSale = conn.prepareStatement(insertSaleQuery, Statement.RETURN_GENERATED_KEYS);
-            pstmtSale.setDouble(1, grandTotal);
-            pstmtSale.executeUpdate();
+            // Step A: Insert master record into invoices table
+            PreparedStatement pstmtInvoice = conn.prepareStatement(insertInvoiceQuery, Statement.RETURN_GENERATED_KEYS);
+            pstmtInvoice.setInt(1, customerId);
+            pstmtInvoice.setInt(2, currentUserId);
+            pstmtInvoice.setDouble(3, grandTotal);
+            pstmtInvoice.executeUpdate();
 
-            ResultSet generatedKeys = pstmtSale.getGeneratedKeys();
-            int saleId = 0;
+            ResultSet generatedKeys = pstmtInvoice.getGeneratedKeys();
+            int invoiceId = 0;
             if (generatedKeys.next()) {
-                saleId = generatedKeys.getInt(1);
+                invoiceId = generatedKeys.getInt(1);
             }
 
-            // Update stock for each item in cart
+            // Step B: Prepare batch statements for line items and stock reduction
+            PreparedStatement pstmtItem = conn.prepareStatement(insertItemQuery);
             PreparedStatement pstmtStock = conn.prepareStatement(updateStockQuery);
+
             for (int i = 0; i < cartModel.getRowCount(); i++) {
                 int prodId = (int) cartModel.getValueAt(i, 0);
+                double unitPrice = (double) cartModel.getValueAt(i, 2);
                 int qtySold = (int) cartModel.getValueAt(i, 3);
+                double subtotal = (double) cartModel.getValueAt(i, 4);
 
+                // Add item to invoice_items batch
+                pstmtItem.setInt(1, invoiceId);
+                pstmtItem.setInt(2, prodId);
+                pstmtItem.setInt(3, qtySold);
+                pstmtItem.setDouble(4, unitPrice);
+                pstmtItem.setDouble(5, subtotal);
+                pstmtItem.addBatch();
+
+                // Add stock reduction to batch
                 pstmtStock.setInt(1, qtySold);
                 pstmtStock.setInt(2, prodId);
                 pstmtStock.addBatch();
             }
+
+            pstmtItem.executeBatch();
             pstmtStock.executeBatch();
 
-            conn.commit(); // Commit transaction successfully
-            JOptionPane.showMessageDialog(this, "Checkout Successful! Sale ID: " + saleId, "Success", JOptionPane.INFORMATION_MESSAGE);
+            conn.commit(); // Commit all database changes securely
+            JOptionPane.showMessageDialog(this, "Checkout Successful! Invoice ID: " + invoiceId, "Success", JOptionPane.INFORMATION_MESSAGE);
 
-            // Reset UI
+            // Reset Cart UI & Customer Field
             cartModel.setRowCount(0);
             grandTotal = 0.0;
             lblGrandTotal.setText("Total: LKR 0.00");
+            txtCustomerId.setText("1");
 
         } catch (SQLException e) {
             if (conn != null) {
@@ -148,6 +190,8 @@ public class POSForm extends javax.swing.JFrame {
 
         jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
+        jLabel4 = new javax.swing.JLabel();
+        txtCustomerId = new javax.swing.JTextField();
         jLabel2 = new javax.swing.JLabel();
         txtSearchProduct = new javax.swing.JTextField();
         jLabel3 = new javax.swing.JLabel();
@@ -171,26 +215,35 @@ public class POSForm extends javax.swing.JFrame {
         jLabel1.setText("Cashier Billing Terminal");
         jPanel1.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 20, -1, -1));
 
+        jLabel4.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jLabel4.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel4.setText("Customer ID:");
+        jPanel1.add(jLabel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 70, -1, -1));
+
+        txtCustomerId.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        txtCustomerId.setText("1"); // Default walk-in customer ID
+        jPanel1.add(txtCustomerId, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 100, 100, 35));
+
         jLabel2.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jLabel2.setForeground(new java.awt.Color(255, 255, 255));
         jLabel2.setText("Product ID / Name:");
-        jPanel1.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 70, -1, -1));
+        jPanel1.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 70, -1, -1));
 
         txtSearchProduct.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        jPanel1.add(txtSearchProduct, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 100, 220, 35));
+        jPanel1.add(txtSearchProduct, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 100, 200, 35));
 
         jLabel3.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jLabel3.setForeground(new java.awt.Color(255, 255, 255));
         jLabel3.setText("Quantity:");
-        jPanel1.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 70, -1, -1));
+        jPanel1.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(370, 70, -1, -1));
 
         txtQuantity.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        jPanel1.add(txtQuantity, new org.netbeans.lib.awtextra.AbsoluteConstraints(270, 100, 100, 35));
+        jPanel1.add(txtQuantity, new org.netbeans.lib.awtextra.AbsoluteConstraints(370, 100, 80, 35));
 
         btnAddToCart.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         btnAddToCart.setText("Add to Cart");
         btnAddToCart.addActionListener(evt -> addToCart());
-        jPanel1.add(btnAddToCart, new org.netbeans.lib.awtextra.AbsoluteConstraints(390, 100, 140, 35));
+        jPanel1.add(btnAddToCart, new org.netbeans.lib.awtextra.AbsoluteConstraints(470, 100, 130, 35));
 
         tableCart.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {},
@@ -198,7 +251,7 @@ public class POSForm extends javax.swing.JFrame {
         ));
         jScrollPane1.setViewportView(tableCart);
 
-        jPanel1.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 150, 640, 220));
+        jPanel1.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 150, 570, 220));
 
         lblGrandTotal.setFont(new java.awt.Font("Segoe UI", 1, 20)); // NOI18N
         lblGrandTotal.setForeground(new java.awt.Color(0, 255, 128));
@@ -210,7 +263,7 @@ public class POSForm extends javax.swing.JFrame {
         btnCheckout.setForeground(new java.awt.Color(255, 255, 255));
         btnCheckout.setText("Complete Payment");
         btnCheckout.addActionListener(evt -> processCheckout());
-        jPanel1.add(btnCheckout, new org.netbeans.lib.awtextra.AbsoluteConstraints(480, 390, 190, 40));
+        jPanel1.add(btnCheckout, new org.netbeans.lib.awtextra.AbsoluteConstraints(410, 390, 190, 40));
 
         btnLogout.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         btnLogout.setForeground(new java.awt.Color(204, 0, 0));
@@ -219,9 +272,9 @@ public class POSForm extends javax.swing.JFrame {
             this.dispose();
             new LoginForm().setVisible(true);
         });
-        jPanel1.add(btnLogout, new org.netbeans.lib.awtextra.AbsoluteConstraints(550, 20, 120, 35));
+        jPanel1.add(btnLogout, new org.netbeans.lib.awtextra.AbsoluteConstraints(480, 20, 120, 35));
 
-        getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 710, 460));
+        getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 630, 460));
 
         pack();
     }
@@ -237,10 +290,12 @@ public class POSForm extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lblGrandTotal;
     private javax.swing.JTable tableCart;
+    private javax.swing.JTextField txtCustomerId;
     private javax.swing.JTextField txtQuantity;
     private javax.swing.JTextField txtSearchProduct;
     // End of variables declaration

@@ -1,16 +1,20 @@
 /*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to license this template
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package com.pharmacy.view;
 
 import com.pharmacy.database.DBConnection;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
+import net.sf.jasperreports.engine.*;
+import net.sf.jasperreports.view.JasperViewer;
 
 /**
  *
@@ -26,18 +30,23 @@ public class ReportsForm extends javax.swing.JFrame {
     public ReportsForm() {
         initComponents();
         setLocationRelativeTo(null); // Center on screen
-        loadLowStockReport(); // Default load low stock report on open
+        loadSalesAuditTable(); // Default load sales audit data into table on open
     }
 
-    private void loadLowStockReport() {
+    // 1. Table Data Loader: Sales & Invoice Audit Summary
+    private void loadSalesAuditTable() {
         DefaultTableModel model = (DefaultTableModel) tableReports.getModel();
         model.setRowCount(0); // Clear existing rows
         
-        // Update column headers for Stock Report
-        model.setColumnIdentifiers(new String[]{"ID", "Product Name", "Stock Quantity", "Unit Price", "Expiry Date"});
+        model.setColumnIdentifiers(new String[]{"Invoice ID", "Date & Time", "Customer", "Cashier", "Payment Method", "Total (LKR)"});
+        jLabel1.setText("Sales & Invoice Audit Report");
 
-        String query = "SELECT product_id, product_name, stock_quantity, unit_price, expiry_date " +
-                       "FROM products WHERE stock_quantity <= 10 ORDER BY stock_quantity ASC";
+        String query = "SELECT i.invoice_id, i.transaction_date, i.total_amount, i.payment_method, " +
+                       "c.customer_name, u.full_name AS cashier_name " +
+                       "FROM invoices i " +
+                       "LEFT JOIN customers c ON i.customer_id = c.customer_id " +
+                       "LEFT JOIN users u ON i.user_id = u.user_id " +
+                       "ORDER BY i.invoice_id DESC";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(query);
@@ -45,43 +54,45 @@ public class ReportsForm extends javax.swing.JFrame {
 
             while (rs.next()) {
                 Object[] row = {
-                    rs.getInt("product_id"),
-                    rs.getString("product_name"),
-                    rs.getInt("stock_quantity"),
-                    rs.getDouble("unit_price"),
-                    rs.getDate("expiry_date")
+                    rs.getInt("invoice_id"),
+                    rs.getTimestamp("transaction_date"),
+                    rs.getString("customer_name"),
+                    rs.getString("cashier_name"),
+                    rs.getString("payment_method"),
+                    rs.getDouble("total_amount")
                 };
                 model.addRow(row);
             }
         } catch (SQLException e) {
-            JOptionPane.showMessageDialog(this, "Error loading low stock report: " + e.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Error loading sales audit table: " + e.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    // 2. Sales History Report Query
-    private void loadSalesHistoryReport() {
-        DefaultTableModel model = (DefaultTableModel) tableReports.getModel();
-        model.setRowCount(0);
-        
-        // Update column headers for Sales Report
-        model.setColumnIdentifiers(new String[]{"Sale ID", "Total Amount (LKR)", "Sale Date & Time"});
-
-        String query = "SELECT sale_id, total_amount, sale_date FROM sales ORDER BY sale_date DESC";
-
+    // 2. JasperReports Generator: Sales & Invoice Audit Report Viewer
+    private void generateSalesAuditJasperReport() {
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(query);
-             ResultSet rs = pstmt.executeQuery()) {
+             InputStream reportStream = new java.io.FileInputStream("src/reports/Sales.jasper")) {
+            
+            JasperPrint print = JasperFillManager.fillReport(reportStream, new HashMap<>(), conn);
+            JasperViewer.viewReport(print, false);
+            
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error generating Sales Audit Report: " + e.getMessage(), "JasperReports Error", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
+    }
 
-            while (rs.next()) {
-                Object[] row = {
-                    rs.getInt("sale_id"),
-                    rs.getDouble("total_amount"),
-                    rs.getTimestamp("sale_date")
-                };
-                model.addRow(row);
-            }
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(this, "Note: If sales table isn't created yet, complete the POS billing terminal first. Error: " + e.getMessage(), "Sales Report Notice", JOptionPane.INFORMATION_MESSAGE);
+    // 3. JasperReports Generator: Low Stock Report Viewer
+    private void generateLowStockJasperReport() {
+        try (Connection conn = DBConnection.getConnection();
+             InputStream reportStream = new java.io.FileInputStream("src/reports/LowStockReport.jasper")) {
+            
+            JasperPrint print = JasperFillManager.fillReport(reportStream, new HashMap<>(), conn);
+            JasperViewer.viewReport(print, false);
+            
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error generating Low Stock Report: " + e.getMessage(), "JasperReports Error", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
         }
     }
 
@@ -99,12 +110,13 @@ public class ReportsForm extends javax.swing.JFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         tableReports = new javax.swing.JTable();
         jPanel2 = new javax.swing.JPanel();
-        btnLowStock = new javax.swing.JButton();
-        btnSales = new javax.swing.JButton();
+        btnViewAuditReport = new javax.swing.JButton();
+        btnViewLowStockReport = new javax.swing.JButton();
         btnRefresh = new javax.swing.JButton();
+        btnBack = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("System Reports Dashboard");
+        setTitle("Pharmacy System Reports Dashboard");
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jPanel1.setBackground(new java.awt.Color(24, 24, 115));
@@ -112,7 +124,7 @@ public class ReportsForm extends javax.swing.JFrame {
 
         jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 22)); // NOI18N
         jLabel1.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel1.setText("Inventory & Sales Reports");
+        jLabel1.setText("Sales & Invoice Audit Report");
         jPanel1.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 20, -1, -1));
 
         tableReports.setModel(new javax.swing.table.DefaultTableModel(
@@ -128,45 +140,56 @@ public class ReportsForm extends javax.swing.JFrame {
         ));
         jScrollPane1.setViewportView(tableReports);
 
-        jPanel1.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 70, 640, 250));
+        jPanel1.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 70, 750, 270));
 
         jPanel2.setBackground(new java.awt.Color(56, 105, 153));
         jPanel2.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        btnLowStock.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        btnLowStock.setText("Low Stock Alert");
-        btnLowStock.addActionListener(this::btnLowStockActionPerformed);
-        jPanel2.add(btnLowStock, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 20, 170, 35));
+        btnViewAuditReport.setFont(new java.awt.Font("Segoe UI", 1, 13)); // NOI18N
+        btnViewAuditReport.setText("View Sales Report");
+        btnViewAuditReport.addActionListener(this::btnViewAuditReportActionPerformed);
+        jPanel2.add(btnViewAuditReport, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 15, 160, 35));
 
-        btnSales.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        btnSales.setText("Sales History Report");
-        btnSales.addActionListener(this::btnSalesActionPerformed);
-        jPanel2.add(btnSales, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 20, 180, 35));
+        btnViewLowStockReport.setFont(new java.awt.Font("Segoe UI", 1, 13)); // NOI18N
+        btnViewLowStockReport.setText("View Low Stock Report");
+        btnViewLowStockReport.addActionListener(this::btnViewLowStockReportActionPerformed);
+        jPanel2.add(btnViewLowStockReport, new org.netbeans.lib.awtextra.AbsoluteConstraints(190, 15, 180, 35));
 
-        btnRefresh.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        btnRefresh.setText("Refresh");
+        btnRefresh.setFont(new java.awt.Font("Segoe UI", 1, 13)); // NOI18N
+        btnRefresh.setText("Refresh Table");
         btnRefresh.addActionListener(this::btnRefreshActionPerformed);
-        jPanel2.add(btnRefresh, new org.netbeans.lib.awtextra.AbsoluteConstraints(420, 20, 140, 35));
+        jPanel2.add(btnRefresh, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 15, 150, 35));
 
-        jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 340, 640, 75));
+        btnBack.setFont(new java.awt.Font("Segoe UI", 1, 13)); // NOI18N
+        btnBack.setText("Back");
+        btnBack.addActionListener(this::btnBackActionPerformed);
+        jPanel2.add(btnBack, new org.netbeans.lib.awtextra.AbsoluteConstraints(540, 15, 110, 35));
 
-        getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 700, 450));
+        jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 360, 750, 65));
+
+        getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 810, 455));
 
         pack();
     }// </editor-fold>                        
 
-    private void btnLowStockActionPerformed(java.awt.event.ActionEvent evt) {                                          
-        loadLowStockReport();
-    }                                         
+    private void btnViewAuditReportActionPerformed(java.awt.event.ActionEvent evt) {                                                   
+        generateSalesAuditJasperReport();
+    }                                                  
 
-    private void btnSalesActionPerformed(java.awt.event.ActionEvent evt) {                                         
-        loadSalesHistoryReport();
-    }                                        
+    private void btnViewLowStockReportActionPerformed(java.awt.event.ActionEvent evt) {                                                      
+        generateLowStockJasperReport();
+    }                                                     
 
     private void btnRefreshActionPerformed(java.awt.event.ActionEvent evt) {                                           
-        loadLowStockReport();
-        JOptionPane.showMessageDialog(this, "Reports data reloaded!", "Refreshed", JOptionPane.INFORMATION_MESSAGE);
-    }                                         
+        loadSalesAuditTable();
+        JOptionPane.showMessageDialog(this, "Sales Audit table reloaded!", "Refreshed", JOptionPane.INFORMATION_MESSAGE);
+    }                                          
+
+    private void btnBackActionPerformed(java.awt.event.ActionEvent evt) {                                        
+        AdminDashboard dashboard = new AdminDashboard();
+        dashboard.setVisible(true);
+        this.dispose();
+    }                                       
 
     /**
      * @param args the command line arguments
@@ -188,9 +211,10 @@ public class ReportsForm extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify                     
-    private javax.swing.JButton btnLowStock;
+    private javax.swing.JButton btnBack;
     private javax.swing.JButton btnRefresh;
-    private javax.swing.JButton btnSales;
+    private javax.swing.JButton btnViewAuditReport;
+    private javax.swing.JButton btnViewLowStockReport;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;

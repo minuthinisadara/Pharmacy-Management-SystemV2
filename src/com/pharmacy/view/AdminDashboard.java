@@ -3,6 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package com.pharmacy.view;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -41,37 +42,55 @@ public class AdminDashboard extends javax.swing.JFrame {
         setBackground(new java.awt.Color(36, 36, 126));
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        jPanel1.setBackground(new java.awt.Color(153, 153, 153));
+        jPanel1.setBackground(new java.awt.Color(15, 15, 93));
         jPanel1.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
+        jLabel1.setForeground(new java.awt.Color(255, 255, 255));
         jLabel1.setText("Administrator Dashboard");
-        jPanel1.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(170, 20, 540, -1));
+        jPanel1.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(170, 20, 360, -1));
 
-        getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 660, 70));
+        getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 660, 90));
 
         jLabel2.setBackground(new java.awt.Color(204, 204, 204));
         jLabel2.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        jLabel2.setText("Welcome, Administrator");
-        getContentPane().add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 100, 220, -1));
+        jLabel2.setText("----Welcome to the Admin Dashboard----");
+        getContentPane().add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 100, 340, -1));
 
-        jPanel2.setBackground(new java.awt.Color(52, 87, 159));
+        jPanel2.setBackground(new java.awt.Color(27, 27, 91));
+        jPanel2.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(255, 255, 255), 3, true));
+        jPanel2.setForeground(new java.awt.Color(255, 255, 255));
         jPanel2.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
+        btnReports.setBackground(new java.awt.Color(190, 190, 234));
+        btnReports.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         btnReports.setText("Sales & Stock Reports");
-        jPanel2.add(btnReports, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 180, -1, -1));
+        btnReports.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(255, 255, 255), 3, true));
+        btnReports.addActionListener(this::btnReportsActionPerformed);
+        jPanel2.add(btnReports, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 190, 270, -1));
 
         btnLogout.setText("Logout");
-        jPanel2.add(btnLogout, new org.netbeans.lib.awtextra.AbsoluteConstraints(540, 240, -1, -1));
+        btnLogout.setBorder(javax.swing.BorderFactory.createEtchedBorder(javax.swing.border.EtchedBorder.RAISED));
+        btnLogout.addActionListener(this::btnLogoutActionPerformed);
+        jPanel2.add(btnLogout, new org.netbeans.lib.awtextra.AbsoluteConstraints(532, 240, 60, 20));
 
-        btnManageUsers.setText("UserAccount Management");
-        jPanel2.add(btnManageUsers, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 100, -1, -1));
+        btnManageUsers.setBackground(new java.awt.Color(190, 190, 234));
+        btnManageUsers.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        btnManageUsers.setForeground(new java.awt.Color(51, 51, 51));
+        btnManageUsers.setText("User Account Management");
+        btnManageUsers.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(255, 255, 255), 3, true));
+        btnManageUsers.addActionListener(this::btnManageUsersActionPerformed);
+        jPanel2.add(btnManageUsers, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 120, 270, -1));
 
+        btnManageInventory.setBackground(new java.awt.Color(190, 190, 234));
+        btnManageInventory.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        btnManageInventory.setForeground(new java.awt.Color(51, 51, 51));
         btnManageInventory.setText("Manage Inventory");
+        btnManageInventory.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(255, 255, 255), 3, true));
         btnManageInventory.addActionListener(this::btnManageInventoryActionPerformed);
-        jPanel2.add(btnManageInventory, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 40, -1, -1));
+        jPanel2.add(btnManageInventory, new org.netbeans.lib.awtextra.AbsoluteConstraints(180, 50, 270, -1));
 
-        getContentPane().add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 130, 660, 290));
+        getContentPane().add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 140, 660, 280));
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -83,6 +102,43 @@ public class AdminDashboard extends javax.swing.JFrame {
     // Optional: If you want to close the dashboard when opening inventory, uncomment below:
     // this.dispose();        // TODO add your handling code here:
     }//GEN-LAST:event_btnManageInventoryActionPerformed
+
+    private void btnManageUsersActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnManageUsersActionPerformed
+// Inside your AdminDashboard.java file
+
+    // 1. Open the User Management Form
+    UserManagementForm userForm = new UserManagementForm();
+    userForm.setVisible(true);
+    
+    // Optional: If you want to close or hide the dashboard when managing users, use:
+    // this.dispose();        // TODO add your handling code here:
+    }//GEN-LAST:event_btnManageUsersActionPerformed
+
+    private void btnReportsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnReportsActionPerformed
+// 1. Open the ReportsForm window
+    ReportsForm reportsForm = new ReportsForm();
+    reportsForm.setVisible(true);
+    
+    // 2. Close the Admin Dashboard (optional: remove this line if you want the dashboard to stay open)
+    this.dispose();        // TODO add your handling code here:
+    }//GEN-LAST:event_btnReportsActionPerformed
+
+    private void btnLogoutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLogoutActionPerformed
+     int confirm = JOptionPane.showConfirmDialog(
+            this, 
+            "Are you sure you want to log out?", 
+            "Confirm Logout", 
+            JOptionPane.YES_NO_OPTION
+        );
+        
+        if (confirm == JOptionPane.YES_OPTION) {
+            // 1. Open the Login form (Update "LoginForm" if your login class name is different)
+            new LoginForm().setVisible(true);
+            
+            // 2. Close the Admin Dashboard
+            this.dispose();
+        }   // TODO add your handling code here:
+    }//GEN-LAST:event_btnLogoutActionPerformed
 
     /**
      * @param args the command line arguments

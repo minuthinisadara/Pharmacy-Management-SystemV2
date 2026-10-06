@@ -1,0 +1,162 @@
+<!-- Created with Jaspersoft Studio version 7.0.3.final using JasperReports Library version 7.0.3-41034ca841d452f3305ba55b9042260aaa1ab5dd  -->
+<jasperReport name="Sales" language="java" columnCount="1" pageWidth="800" pageHeight="842" orientation="Landscape" columnWidth="760" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="c44e1a13-4128-41ef-841b-6f309b09854f">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="pharmacy_db"/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<query language="SQL"><![CDATA[SELECT 
+    i.invoice_id,
+    i.transaction_date AS invoice_date,
+    i.total_amount AS invoice_total,
+    i.payment_method,
+    c.customer_name,
+    u.full_name AS cashier_name,
+    ii.quantity_sold,
+    ii.unit_price_at_sale,
+    ii.subtotal AS line_total,
+    p.product_name
+FROM invoices i
+LEFT JOIN customers c ON i.customer_id = c.customer_id
+LEFT JOIN users u ON i.user_id = u.user_id
+JOIN invoice_items ii ON i.invoice_id = ii.invoice_id
+JOIN products p ON ii.product_id = p.product_id
+ORDER BY i.invoice_id DESC;]]></query>
+	<field name="invoice_id" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="invoice_id"/>
+		<property name="com.jaspersoft.studio.field.label" value="invoice_id"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="invoices"/>
+	</field>
+	<field name="invoice_date" class="java.sql.Timestamp">
+		<property name="com.jaspersoft.studio.field.name" value="transaction_date"/>
+		<property name="com.jaspersoft.studio.field.label" value="invoice_date"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="invoices"/>
+	</field>
+	<field name="invoice_total" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.name" value="total_amount"/>
+		<property name="com.jaspersoft.studio.field.label" value="invoice_total"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="invoices"/>
+	</field>
+	<field name="payment_method" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="payment_method"/>
+		<property name="com.jaspersoft.studio.field.label" value="payment_method"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="invoices"/>
+	</field>
+	<field name="customer_name" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="customer_name"/>
+		<property name="com.jaspersoft.studio.field.label" value="customer_name"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="customers"/>
+	</field>
+	<field name="cashier_name" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="full_name"/>
+		<property name="com.jaspersoft.studio.field.label" value="cashier_name"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="users"/>
+	</field>
+	<field name="quantity_sold" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="quantity_sold"/>
+		<property name="com.jaspersoft.studio.field.label" value="quantity_sold"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="invoice_items"/>
+	</field>
+	<field name="unit_price_at_sale" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.name" value="unit_price_at_sale"/>
+		<property name="com.jaspersoft.studio.field.label" value="unit_price_at_sale"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="invoice_items"/>
+	</field>
+	<field name="line_total" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.name" value="subtotal"/>
+		<property name="com.jaspersoft.studio.field.label" value="line_total"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="invoice_items"/>
+	</field>
+	<field name="product_name" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="product_name"/>
+		<property name="com.jaspersoft.studio.field.label" value="product_name"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="products"/>
+	</field>
+	<background splitType="Stretch"/>
+	<title height="79" splitType="Stretch">
+		<element kind="staticText" uuid="f4548ae4-ceaa-4f22-861d-f5c72df3bf52" x="100" y="10" width="420" height="57">
+			<text><![CDATA[Pharmacy Sales & Invoice Audit Report]]></text>
+			<property name="net.sf.jasperreports.style.fontSize" value="18"/>
+			<property name="net.sf.jasperreports.style.isBold" value="true"/>
+		</element>
+	</title>
+	<pageHeader splitType="Stretch"/>
+	<columnHeader height="72" splitType="Stretch">
+		<element kind="staticText" uuid="5be892ea-6402-416e-8cd3-cc761300c25e" x="-10" y="20" width="100" height="30">
+			<text><![CDATA[Invoice ID]]></text>
+			<property name="net.sf.jasperreports.style.fontSize" value="12"/>
+			<property name="net.sf.jasperreports.style.isBold" value="true"/>
+		</element>
+		<element kind="staticText" uuid="42acae88-71fc-4ea6-8e95-5d1a74105fbb" x="100" y="20" width="100" height="30">
+			<text><![CDATA[Date]]></text>
+			<property name="net.sf.jasperreports.style.fontSize" value="12"/>
+			<property name="net.sf.jasperreports.style.isBold" value="true"/>
+		</element>
+		<element kind="staticText" uuid="48615291-9ee9-4634-a3f4-d1ef6cf8e830" x="210" y="20" width="100" height="30">
+			<text><![CDATA[Customer]]></text>
+			<property name="net.sf.jasperreports.style.fontSize" value="12"/>
+			<property name="net.sf.jasperreports.style.isBold" value="true"/>
+		</element>
+		<element kind="staticText" uuid="a604b316-a531-4847-bdc2-0f0c1c29ddcc" x="320" y="20" width="100" height="30">
+			<text><![CDATA[Product]]></text>
+			<property name="net.sf.jasperreports.style.fontSize" value="12"/>
+			<property name="net.sf.jasperreports.style.isBold" value="true"/>
+		</element>
+		<element kind="staticText" uuid="3f9f68e9-19f9-47a5-aabf-741695e9d4ba" x="430" y="20" width="100" height="30">
+			<text><![CDATA[Qty]]></text>
+			<property name="net.sf.jasperreports.style.isBold" value="true"/>
+			<property name="net.sf.jasperreports.style.fontSize" value="12"/>
+		</element>
+		<element kind="staticText" uuid="7692addd-a7c1-42e2-94d6-a4151a39d314" x="540" y="20" width="100" height="30">
+			<text><![CDATA[Price]]></text>
+			<property name="net.sf.jasperreports.style.fontSize" value="12"/>
+			<property name="net.sf.jasperreports.style.isBold" value="true"/>
+		</element>
+		<element kind="staticText" uuid="f654c0f9-9086-45a0-a148-aac6ba9e4670" x="650" y="20" width="100" height="30">
+			<text><![CDATA[Subtotal]]></text>
+			<property name="net.sf.jasperreports.style.fontSize" value="12"/>
+			<property name="net.sf.jasperreports.style.isBold" value="true"/>
+		</element>
+	</columnHeader>
+	<detail>
+		<band height="42" splitType="Stretch">
+			<element kind="textField" uuid="f44dde00-00c6-49f3-8985-492fecf2476f" x="-10" y="10" width="100" height="30">
+				<expression><![CDATA[$F{invoice_id}]]></expression>
+				<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="5d9f525b-c31e-4865-a023-b0286ad6c666"/>
+			</element>
+			<element kind="textField" uuid="1ce633e5-f5cd-40b8-acaf-95b03e3f7af4" x="100" y="10" width="100" height="30">
+				<expression><![CDATA[$F{invoice_date}]]></expression>
+				<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="e04c80f0-4326-412e-8af8-315ac5abd64b"/>
+			</element>
+			<element kind="textField" uuid="d9bc9411-9d12-42c9-95da-47c27e02efd4" x="210" y="10" width="100" height="30">
+				<expression><![CDATA[$F{customer_name}]]></expression>
+				<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="12fb2cab-72e1-4394-987f-dbb84f3cb703"/>
+			</element>
+			<element kind="textField" uuid="16665283-dde9-4c94-acce-70f5c4593eff" x="320" y="10" width="100" height="30">
+				<expression><![CDATA[$F{product_name}]]></expression>
+				<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="ff6eff11-0aaf-46ab-bd6a-b9eb73809399"/>
+			</element>
+			<element kind="textField" uuid="8071d521-5a0c-499e-bfdd-706ad90cf4e1" x="430" y="10" width="100" height="30">
+				<expression><![CDATA[$F{quantity_sold}]]></expression>
+				<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="cbb2a297-769d-4c1d-8bde-eab86e3ef547"/>
+			</element>
+			<element kind="textField" uuid="4b03b744-1c35-4631-9e3b-da4fc5216ed6" x="540" y="10" width="100" height="30">
+				<expression><![CDATA[$F{unit_price_at_sale}]]></expression>
+				<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="93a68175-b349-4fb9-a953-25eeef3d401d"/>
+			</element>
+			<element kind="textField" uuid="3ca37106-3e1f-4287-858c-fdc653337dc3" x="650" y="10" width="100" height="30">
+				<expression><![CDATA[$F{line_total}]]></expression>
+				<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="69984ad7-8084-4db2-bb0c-a7bbe67de896"/>
+			</element>
+		</band>
+	</detail>
+	<columnFooter height="45" splitType="Stretch"/>
+	<pageFooter height="54" splitType="Stretch"/>
+	<summary height="59" splitType="Stretch"/>
+</jasperReport>

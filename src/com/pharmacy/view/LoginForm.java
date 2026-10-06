@@ -45,10 +45,8 @@ public class LoginForm extends javax.swing.JFrame {
 
                 // Role-Based Redirection
                 if (role.equalsIgnoreCase("Admin")) {
-                    // Open Admin Dashboard (Make sure AdminDashboard class exists in your project)
                     new AdminDashboard().setVisible(true);
                 } else if (role.equalsIgnoreCase("Cashier")) {
-                    // Open Cashier POS Billing Terminal automatically
                     new POSForm().setVisible(true);
                 } else {
                     JOptionPane.showMessageDialog(this, "Unknown role assigned to user.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -72,6 +70,7 @@ public class LoginForm extends javax.swing.JFrame {
         txtUsername = new javax.swing.JTextField();
         jLabel3 = new javax.swing.JLabel();
         txtPassword = new javax.swing.JPasswordField();
+        chkShowPassword = new javax.swing.JCheckBox();
         btnLogin = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -89,18 +88,32 @@ public class LoginForm extends javax.swing.JFrame {
         jLabel2.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jLabel2.setForeground(new java.awt.Color(255, 255, 255));
         jLabel2.setText("Username:");
-        jPanel1.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 90, -1, -1));
+        jPanel1.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 85, -1, -1));
 
         txtUsername.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        jPanel1.add(txtUsername, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 120, 300, 35));
+        jPanel1.add(txtUsername, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 110, 300, 35));
 
         jLabel3.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         jLabel3.setForeground(new java.awt.Color(255, 255, 255));
         jLabel3.setText("Password:");
-        jPanel1.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 170, -1, -1));
+        jPanel1.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 155, -1, -1));
 
         txtPassword.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        jPanel1.add(txtPassword, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 200, 300, 35));
+        jPanel1.add(txtPassword, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 180, 300, 35));
+
+        // Toggle checkbox to show or hide the password characters
+        chkShowPassword.setBackground(new java.awt.Color(24, 24, 115));
+        chkShowPassword.setFont(new java.awt.Font("Segoe UI", 0, 12)); // NOI18N
+        chkShowPassword.setForeground(new java.awt.Color(255, 255, 255));
+        chkShowPassword.setText("Show Password");
+        chkShowPassword.addActionListener(evt -> {
+            if (chkShowPassword.isSelected()) {
+                txtPassword.setEchoChar((char) 0); // Reveal password text
+            } else {
+                txtPassword.setEchoChar('•'); // Mask password text
+            }
+        });
+        jPanel1.add(chkShowPassword, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 220, -1, -1));
 
         btnLogin.setBackground(new java.awt.Color(56, 105, 153));
         btnLogin.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
@@ -109,7 +122,7 @@ public class LoginForm extends javax.swing.JFrame {
         btnLogin.addActionListener(evt -> handleLogin());
         jPanel1.add(btnLogin, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 270, 300, 40));
 
-        getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 400, 360));
+        getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 400, 350));
 
         pack();
     }
@@ -130,6 +143,7 @@ public class LoginForm extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify
+    private javax.swing.JCheckBox chkShowPassword;
     private javax.swing.JButton btnLogin;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;

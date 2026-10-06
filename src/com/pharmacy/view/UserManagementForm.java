@@ -71,6 +71,7 @@ public class UserManagementForm extends javax.swing.JFrame {
         btnUpdateUser = new javax.swing.JButton();
         btnRefresh = new javax.swing.JButton();
         btnAddUser = new javax.swing.JButton();
+        btnBack = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -86,11 +87,13 @@ public class UserManagementForm extends javax.swing.JFrame {
         jPanel3.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
         getContentPane().add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 640, -1));
 
-        jPanel4.setBackground(new java.awt.Color(153, 153, 153));
+        jPanel4.setBackground(new java.awt.Color(37, 37, 105));
         jPanel4.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        jLabel1.setText("User acount management");
-        jPanel4.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(128, 6, 308, 41));
+        jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
+        jLabel1.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel1.setText("User Acount Management");
+        jPanel4.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(140, 20, 350, 41));
 
         getContentPane().add(jPanel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 640, 80));
 
@@ -108,26 +111,34 @@ public class UserManagementForm extends javax.swing.JFrame {
         ));
         jScrollPane1.setViewportView(tableUsers);
 
-        getContentPane().add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 80, -1, 210));
+        getContentPane().add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 80, 640, 210));
 
         jPanel5.setBackground(new java.awt.Color(25, 25, 80));
         jPanel5.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
+        btnDeleteUser.setBackground(new java.awt.Color(204, 204, 255));
         btnDeleteUser.setText("Delete user");
         btnDeleteUser.addActionListener(this::btnDeleteUserActionPerformed);
-        jPanel5.add(btnDeleteUser, new org.netbeans.lib.awtextra.AbsoluteConstraints(320, 50, -1, -1));
+        jPanel5.add(btnDeleteUser, new org.netbeans.lib.awtextra.AbsoluteConstraints(320, 40, -1, -1));
 
+        btnUpdateUser.setBackground(new java.awt.Color(204, 204, 255));
         btnUpdateUser.setText("Edit");
         btnUpdateUser.addActionListener(this::btnUpdateUserActionPerformed);
-        jPanel5.add(btnUpdateUser, new org.netbeans.lib.awtextra.AbsoluteConstraints(170, 50, -1, -1));
+        jPanel5.add(btnUpdateUser, new org.netbeans.lib.awtextra.AbsoluteConstraints(170, 40, -1, -1));
 
+        btnRefresh.setBackground(new java.awt.Color(204, 204, 255));
         btnRefresh.setText("Refresh");
         btnRefresh.addActionListener(this::btnRefreshActionPerformed);
-        jPanel5.add(btnRefresh, new org.netbeans.lib.awtextra.AbsoluteConstraints(460, 50, -1, -1));
+        jPanel5.add(btnRefresh, new org.netbeans.lib.awtextra.AbsoluteConstraints(460, 40, -1, -1));
 
+        btnAddUser.setBackground(new java.awt.Color(204, 204, 255));
         btnAddUser.setText("Add user");
         btnAddUser.addActionListener(this::btnAddUserActionPerformed);
-        jPanel5.add(btnAddUser, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 50, -1, -1));
+        jPanel5.add(btnAddUser, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 40, -1, -1));
+
+        btnBack.setText("Back");
+        btnBack.addActionListener(this::btnBackActionPerformed);
+        jPanel5.add(btnBack, new org.netbeans.lib.awtextra.AbsoluteConstraints(510, 80, 90, -1));
 
         getContentPane().add(jPanel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 290, 640, 120));
 
@@ -234,6 +245,17 @@ loadUserData();
     JOptionPane.showMessageDialog(this, "User list refreshed!", "Refreshed", JOptionPane.INFORMATION_MESSAGE);        // TODO add your handling code here:
     }//GEN-LAST:event_btnRefreshActionPerformed
 
+    private void btnBackActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBackActionPerformed
+      // 1. Create an instance of your admin dashboard window
+        AdminDashboard dashboard = new AdminDashboard();
+        
+        // 2. Make the dashboard visible
+        dashboard.setVisible(true);
+        
+        // 3. Close the current user management window
+        this.dispose();  // TODO add your handling code here:
+    }//GEN-LAST:event_btnBackActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -261,6 +283,7 @@ loadUserData();
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAddUser;
+    private javax.swing.JButton btnBack;
     private javax.swing.JButton btnDeleteUser;
     private javax.swing.JButton btnRefresh;
     private javax.swing.JButton btnUpdateUser;

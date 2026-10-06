@@ -77,16 +77,18 @@ public class InventoryForm extends javax.swing.JFrame {
         btnDelete = new javax.swing.JButton();
         btnRefresh = new javax.swing.JButton();
         btnAdd = new javax.swing.JButton();
+        jButtonBack = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        jPanel1.setBackground(new java.awt.Color(24, 24, 115));
+        jPanel1.setBackground(new java.awt.Color(18, 18, 96));
         jPanel1.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jLabel1.setFont(new java.awt.Font("Segoe UI Variable", 1, 24)); // NOI18N
-        jLabel1.setText("Pharmacy Inventor Management System");
-        jPanel1.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(80, 20, 510, -1));
+        jLabel1.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel1.setText("Pharmacy Inventory Management System");
+        jPanel1.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 20, 510, -1));
 
         jPanel2.setBackground(new java.awt.Color(56, 105, 153));
         jPanel2.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -118,7 +120,7 @@ public class InventoryForm extends javax.swing.JFrame {
         ));
         jScrollPane1.setViewportView(tableProducts);
 
-        jPanel2.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(82, 110, 580, 200));
+        jPanel2.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(80, 100, 580, 200));
 
         jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 70, 740, 320));
 
@@ -141,9 +143,13 @@ public class InventoryForm extends javax.swing.JFrame {
         btnAdd.addActionListener(this::btnAddActionPerformed);
         jPanel3.add(btnAdd, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 40, -1, -1));
 
+        jButtonBack.setText("Back to dashboard");
+        jButtonBack.addActionListener(this::jButtonBackActionPerformed);
+        jPanel3.add(jButtonBack, new org.netbeans.lib.awtextra.AbsoluteConstraints(480, 80, 180, 20));
+
         jPanel1.add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 390, 740, 110));
 
-        getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 740, 500));
+        getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(-10, 0, 750, 500));
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -184,43 +190,61 @@ String keyword = txtSearch.getText().trim();
     }//GEN-LAST:event_btnSearchActionPerformed
 
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
-// Prompt the user for product details (or grab them from input fields if you created text boxes for them)
-    String productName = JOptionPane.showInputDialog(this, "Enter Product Name:");
-    if (productName == null || productName.trim().isEmpty()) return;
+   // 1. Prompt user for all required database fields matching your schema
+        String productCode = JOptionPane.showInputDialog(this, "Enter Product Code (e.g., MED009):");
+        if (productCode == null || productCode.trim().isEmpty()) return;
 
-    String categoryStr = JOptionPane.showInputDialog(this, "Enter Category ID (e.g., 1 for Painkillers, 2 for Antibiotics):");
-    if (categoryStr == null || categoryStr.trim().isEmpty()) return;
+        String productName = JOptionPane.showInputDialog(this, "Enter Product Name:");
+        if (productName == null || productName.trim().isEmpty()) return;
 
-    String priceStr = JOptionPane.showInputDialog(this, "Enter Unit Price:");
-    if (priceStr == null || priceStr.trim().isEmpty()) return;
+        String categoryStr = JOptionPane.showInputDialog(this, "Enter Category ID (e.g., 1, 2, 3):");
+        if (categoryStr == null || categoryStr.trim().isEmpty()) return;
 
-    String qtyStr = JOptionPane.showInputDialog(this, "Enter Stock Quantity:");
-    if (qtyStr == null || qtyStr.trim().isEmpty()) return;
+        String supplierStr = JOptionPane.showInputDialog(this, "Enter Supplier ID (e.g., 1, 2, 3):");
+        if (supplierStr == null || supplierStr.trim().isEmpty()) return;
 
-    String expiryStr = JOptionPane.showInputDialog(this, "Enter Expiry Date (YYYY-MM-DD):");
-    if (expiryStr == null || expiryStr.trim().isEmpty()) return;
+        String priceStr = JOptionPane.showInputDialog(this, "Enter Unit Price (Selling Price):");
+        if (priceStr == null || priceStr.trim().isEmpty()) return;
 
-    String query = "INSERT INTO products (product_name, category_id, unit_price, stock_quantity, expiry_date) VALUES (?, ?, ?, ?, ?)";
+        String costPriceStr = JOptionPane.showInputDialog(this, "Enter Cost Price:");
+        if (costPriceStr == null || costPriceStr.trim().isEmpty()) return;
 
-    try (Connection conn = DBConnection.getConnection();
-         PreparedStatement pstmt = conn.prepareStatement(query)) {
-        
-        pstmt.setString(1, productName.trim());
-        pstmt.setInt(2, Integer.parseInt(categoryStr.trim()));
-        pstmt.setDouble(3, Double.parseDouble(priceStr.trim()));
-        pstmt.setInt(4, Integer.parseInt(qtyStr.trim()));
-        pstmt.setString(5, expiryStr.trim());
-        
-        int rowsInserted = pstmt.executeUpdate();
-        if (rowsInserted > 0) {
-            JOptionPane.showMessageDialog(this, "Product added successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
-            loadInventoryData(); // Refresh table automatically
+        String qtyStr = JOptionPane.showInputDialog(this, "Enter Stock Quantity:");
+        if (qtyStr == null || qtyStr.trim().isEmpty()) return;
+
+        String reorderStr = JOptionPane.showInputDialog(this, "Enter Reorder Level (e.g., 20):");
+        if (reorderStr == null || reorderStr.trim().isEmpty()) return;
+
+        String expiryStr = JOptionPane.showInputDialog(this, "Enter Expiry Date (YYYY-MM-DD):");
+        if (expiryStr == null || expiryStr.trim().isEmpty()) return;
+
+        // 2. Full SQL INSERT statement matching all columns
+        String query = "INSERT INTO products (product_code, product_name, category_id, supplier_id, unit_price, cost_price, stock_quantity, reorder_level, expiry_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(query)) {
+            
+            pstmt.setString(1, productCode.trim());
+            pstmt.setString(2, productName.trim());
+            pstmt.setInt(3, Integer.parseInt(categoryStr.trim()));
+            pstmt.setInt(4, Integer.parseInt(supplierStr.trim()));
+            pstmt.setDouble(5, Double.parseDouble(priceStr.trim()));
+            pstmt.setDouble(6, Double.parseDouble(costPriceStr.trim()));
+            pstmt.setInt(7, Integer.parseInt(qtyStr.trim()));
+            pstmt.setInt(8, Integer.parseInt(reorderStr.trim()));
+            pstmt.setString(9, expiryStr.trim());
+            
+            int rowsInserted = pstmt.executeUpdate();
+            if (rowsInserted > 0) {
+                JOptionPane.showMessageDialog(this, "Product added successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                loadInventoryData(); // Refresh table automatically
+            }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Please enter valid numeric values for IDs, prices, quantities, or reorder levels.", "Input Error", JOptionPane.ERROR_MESSAGE);
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "Database error: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
-    } catch (NumberFormatException e) {
-        JOptionPane.showMessageDialog(this, "Please enter valid numeric values for price, quantity, or category ID.", "Input Error", JOptionPane.ERROR_MESSAGE);
-    } catch (SQLException e) {
-        JOptionPane.showMessageDialog(this, "Database error: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-    }        // TODO add your handling code here:
+        
     }//GEN-LAST:event_btnAddActionPerformed
 
     private void btnUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateActionPerformed
@@ -325,6 +349,17 @@ String keyword = txtSearch.getText().trim();
        // TODO add your handling code here:
     }//GEN-LAST:event_btnRefreshActionPerformed
 
+    private void jButtonBackActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonBackActionPerformed
+// 1. Create an instance of your admin dashboard window
+    AdminDashboard dashboard = new AdminDashboard();
+    
+    // 2. Make the dashboard visible
+    dashboard.setVisible(true);
+    
+    // 3. Close the current module window
+    this.dispose();        // TODO add your handling code here:
+    }//GEN-LAST:event_jButtonBackActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -356,6 +391,7 @@ String keyword = txtSearch.getText().trim();
     private javax.swing.JButton btnRefresh;
     private javax.swing.JButton btnSearch;
     private javax.swing.JButton btnUpdate;
+    private javax.swing.JButton jButtonBack;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JPanel jPanel1;
