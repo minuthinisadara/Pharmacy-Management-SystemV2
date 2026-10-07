@@ -71,27 +71,35 @@ public class ReportsForm extends javax.swing.JFrame {
     // 2. JasperReports Generator: Sales & Invoice Audit Report Viewer
     private void generateSalesAuditJasperReport() {
         try (Connection conn = DBConnection.getConnection();
-             InputStream reportStream = new java.io.FileInputStream("src/reports/Sales.jasper")) {
-            
+             InputStream reportStream = getClass().getResourceAsStream("/reports/Sales.jasper")) {
+
+            if (reportStream == null) {
+                throw new Exception("Sales.jasper report file not found in application resources.");
+            }
+
             JasperPrint print = JasperFillManager.fillReport(reportStream, new HashMap<>(), conn);
             JasperViewer.viewReport(print, false);
-            
+
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Error generating Sales Audit Report: " + e.getMessage(), "JasperReports Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Error generating Sales Audit Report:\n" + e.getMessage(), "JasperReports Error", JOptionPane.ERROR_MESSAGE);
             e.printStackTrace();
         }
     }
 
     // 3. JasperReports Generator: Low Stock Report Viewer
     private void generateLowStockJasperReport() {
-        try (Connection conn = DBConnection.getConnection();
-             InputStream reportStream = new java.io.FileInputStream("src/reports/LowStockReport.jasper")) {
-            
+       try (Connection conn = DBConnection.getConnection();
+             InputStream reportStream = getClass().getResourceAsStream("/reports/LowStockReport.jasper")) {
+
+            if (reportStream == null) {
+                throw new Exception("LowStockReport.jasper not found in application resources.");
+            }
+
             JasperPrint print = JasperFillManager.fillReport(reportStream, new HashMap<>(), conn);
             JasperViewer.viewReport(print, false);
-            
+
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Error generating Low Stock Report: " + e.getMessage(), "JasperReports Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Error generating Low Stock Report:\n" + e.getMessage(), "JasperReports Error", JOptionPane.ERROR_MESSAGE);
             e.printStackTrace();
         }
     }
